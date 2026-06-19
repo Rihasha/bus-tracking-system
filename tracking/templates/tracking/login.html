@@ -1,0 +1,47 @@
+{% extends 'tracking/base.html' %}
+
+{% block title %}Login to BusTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5 pt-5 min-vh-100">
+    <div class="col-md-6 col-lg-5">
+        <div class="card p-4 shadow-lg border-0 rounded-4">
+            <div class="card-body">
+                <h2 class="text-center mb-4 fw-bold">Login to Your Account</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted fw-bold">Username</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted fw-bold">Password</label>
+                        {{ form.password }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill mt-4">Login</button>
+                    <div class="mt-4 text-center">
+                        Don't have an account? <a href="{% url 'register' %}" class="text-decoration-none">Join Now</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+</style>
+{% endblock %}

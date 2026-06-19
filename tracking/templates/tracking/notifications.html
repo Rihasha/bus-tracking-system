@@ -1,0 +1,30 @@
+{% extends 'tracking/base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h2 class="fw-bold mb-4 text-primary">Your Notifications</h2>
+            <div class="list-group">
+                {% for note in notifications %}
+                <div
+                    class="list-group-item list-group-item-action {% if not note.is_read %}bg-light{% endif %} p-4 border-0 mb-3 rounded-4 shadow-sm">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1 fw-bold">{{ note.message }}</h5>
+                        <small class="text-muted">{{ note.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+                    <p class="mb-1 text-muted">System Alert</p>
+                </div>
+                {% empty %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash text-muted mb-3" style="font-size: 48px;"></i>
+                    <p class="text-muted">You have no notifications yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

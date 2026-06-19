@@ -1,0 +1,183 @@
+{% extends 'tracking/base.html' %}
+
+{% block title %}Route: {{ route.name }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">{{ route.name }}</li>
+    </ol>
+</nav>
+
+<div class="row mb-4">
+    <div class="col-12 d-flex align-items-center justify-content-between">
+        <div>
+            <h2 class="fw-bold mb-1 text-primary">{{ route.name }}</h2>
+            <p class="text-muted mb-0">
+                <i class="fas fa-map-marker-alt me-1 text-success"></i>{{ route.source }}
+                &nbsp;<i class="fas fa-arrow-right mx-2 text-muted"></i>&nbsp;
+                <i class="fas fa-flag-checkered me-1 text-danger"></i>{{ route.destination }}
+            </p>
+        </div>
+        <a href="{% url 'dashboard' %}#available-routes" class="btn btn-outline-primary rounded-pill">
+            <i class="fas fa-arrow-left me-2"></i>Back to Routes
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Route Map -->
+    <div class="col-md-8 mb-4">
+        <div class="card p-2">
+            <div id="routeMap" style="height: 450px; border-radius: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- Stops & Buses -->
+    <div class="col-md-4">
+        <!-- Bus Stops -->
+        <div class="card p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-map-pin me-2 text-primary"></i>Bus Stops</h5>
+            <div class="list-group list-group-flush">
+                {% for rs in stops %}
+                <div class="list-group-item border-0 px-0 py-2 d-flex align-items-start">
+                    <span class="badge bg-primary rounded-circle me-2 mt-1"
+                          style="width:24px;height:24px;display:grid;place-items:center;font-size:11px;">
+                        {{ forloop.counter }}
+                    </span>
+                    <div>
+                        <div class="fw-bold small">{{ rs.stop.name }}</div>
+                        <div class="text-muted" style="font-size:11px;">
+                            {{ rs.stop.latitude }}, {{ rs.stop.longitude }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted small">No stops defined.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Active Buses on Route -->
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-bus me-2 text-success"></i>Active Buses</h5>
+            <div class="list-group list-group-flush">
+                {% for bus in route.bus_set.all %}
+                <div class="list-group-item border-0 px-0 py-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success text-white rounded-circle me-2"
+                             style="width:32px;height:32px;display:grid;place-items:center;">
+                            <i class="fas fa-bus" style="font-size:12px;"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold small">Bus #{{ bus.bus_number }}</div>
+                            <div class="text-muted" style="font-size:11px;">
+                                Speed: {{ bus.speed }} km/h &nbsp;|&nbsp;
+                                <span class="badge bg-{{ bus.status|yesno:'success,secondary,warning' }} text-white">
+                                    {{ bus.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted small">No active buses on this route.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Build stop data from Django context
+    const stops = [
+        {% for rs in stops %}
+        {
+            name: "{{ rs.stop.name }}",
+            lat: {{ rs.stop.latitude }},
+            lng: {{ rs.stop.longitude }},
+            order: {{ forloop.counter }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const map = L.map('routeMap');
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    if (stops.length === 0) {
+        map.setView([11.0, 78.5], 7); // Tamil Nadu fallback
+    } else {
+        const coords = stops.map(s => [s.lat, s.lng]);
+
+        // Draw the route polyline
+        const polyline = L.polyline(coords, {
+            color: '#0d6efd',
+            weight: 4,
+            opacity: 0.85,
+            dashArray: '8, 5'
+        }).addTo(map);
+
+        // Add markers for each stop
+        stops.forEach((stop, i) => {
+            const isFirst = i === 0;
+            const isLast  = i === stops.length - 1;
+            const color   = isFirst ? '#198754' : isLast ? '#dc3545' : '#0d6efd';
+
+            const icon = L.divIcon({
+                className: '',
+                html: `<div style="
+                    background:${color}; color:white; border-radius:50%;
+                    width:28px; height:28px; display:flex; align-items:center;
+                    justify-content:center; font-weight:bold; font-size:12px;
+                    border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.3);">
+                    ${stop.order}
+                </div>`,
+                iconAnchor: [14, 14]
+            });
+
+            L.marker([stop.lat, stop.lng], { icon })
+             .addTo(map)
+             .bindPopup(`<b>${stop.name}</b><br>Stop ${stop.order}`);
+        });
+
+        // Fit map to route bounds
+        map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+    }
+
+    // Show active buses on the route map
+    const buses = [
+        {% for bus in route.bus_set.all %}
+        {
+            number: "{{ bus.bus_number }}",
+            lat: {{ bus.current_lat }},
+            lng: {{ bus.current_lon }},
+            speed: {{ bus.speed }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const busIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    buses.forEach(bus => {
+        if (bus.lat && bus.lng) {
+            L.marker([bus.lat, bus.lng], { icon: busIcon })
+             .addTo(map)
+             .bindPopup(`<b>Bus #${bus.number}</b><br>Speed: ${bus.speed} km/h`);
+        }
+    });
+</script>
+{% endblock %}

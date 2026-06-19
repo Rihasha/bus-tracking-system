@@ -1,0 +1,49 @@
+{% extends 'tracking/base.html' %}
+
+{% block title %}Welcome to BusTrack{% endblock %}
+
+{% block content %}
+<div class="row min-vh-100 align-items-center">
+    <div class="col-md-6">
+        <h1 class="display-4 fw-bold text-primary mb-4">Track Real-Time Public Buses & Plan Your Journey</h1>
+        <p class="lead text-secondary mb-5">
+            Never miss a bus again with our real-time GPS tracking system. Get accurate ETAs, find the fastest routes,
+            and receive timely notifications about your commute.
+        </p>
+        <div class="d-flex gap-3">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg rounded-pill px-5">Join Now</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-5">Login</a>
+        </div>
+    </div>
+    <div class="col-md-6 d-none d-md-block">
+        <div class="p-4 shadow-lg rounded-circle bg-white text-center d-flex align-items-center justify-content-center"
+            style="width: 500px; height: 500px; margin: 0 auto; overflow: hidden;">
+            <i class="fas fa-bus-alt text-primary" style="font-size: 250px;"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 pt-5 text-center">
+    <div class="col-md-4 mb-4">
+        <div class="p-4 bg-white rounded shadow-sm h-100 border-top border-4 border-primary">
+            <i class="fas fa-user-shield text-primary mb-3" style="font-size: 40px;"></i>
+            <h3 class="h4">Admin Control</h3>
+            <p class="text-muted small">Administrators can <b>manage bus routes, stops, and schedules</b> dynamically to ensure efficient transit.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="p-4 bg-white rounded shadow-sm h-100 border-top border-4 border-success">
+            <i class="fas fa-route text-success mb-3" style="font-size: 40px;"></i>
+            <h3 class="h4">Shortest Path</h3>
+            <p class="text-muted small">Uses the <b>Shortest Path Algorithm (Dijkstra's)</b> to calculate the fastest route and estimated travel time for your journey.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="p-4 bg-white rounded shadow-sm h-100 border-top border-4 border-warning">
+            <i class="fas fa-bell text-warning mb-3" style="font-size: 40px;"></i>
+            <h3 class="h4">Smart Notifications</h3>
+            <p class="text-muted small">The system <b>sends notifications</b> about bus arrivals or delays to keep your schedule on track.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'tracking/base.html' %}
+{% block title %}SOS Dashboard{% endblock %}
+{% block content %}
+<div class="card p-4">
+  <h4 class="fw-bold mb-4 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>SOS Alert Dashboard</h4>
+  {% if alerts %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th><th>User</th><th>Bus</th><th>Message</th><th>Status</th><th>Time</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alert in alerts %}
+        <tr>
+          <td>{{ alert.id }}</td>
+          <td><b>{{ alert.user.username }}</b><br><small class="text-muted">{{ alert.user.phone_number|default:"-" }}</small></td>
+          <td>{{ alert.bus.bus_number|default:"N/A" }}</td>
+          <td>{{ alert.message }}</td>
+          <td>
+            {% if alert.status == 'pending' %}
+              <span class="badge bg-danger">Pending</span>
+            {% elif alert.status == 'resolved' %}
+              <span class="badge bg-success">Resolved</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">{{ alert.status }}</span>
+            {% endif %}
+          </td>
+          <td><small>{{ alert.created_at|date:"M d, H:i" }}</small></td>
+          <td>
+            {% if alert.status == 'pending' %}
+            <a href="/api/sos/{{ alert.id }}/resolve/" class="btn btn-sm btn-success">Resolve</a>
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No SOS alerts found.</p>
+  {% endif %}
+</div>
+{% endblock %}

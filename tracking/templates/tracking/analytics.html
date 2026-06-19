@@ -1,0 +1,96 @@
+{% extends 'tracking/base.html' %}
+
+{% block title %}Historical Data Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2 class="fw-bold"><i class="fas fa-chart-line me-2 text-primary"></i>System Analytics & Performance</h2>
+        <p class="text-muted">Data-driven insights for route optimization and bus efficiency.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Average Speeds -->
+    <div class="col-md-6 mb-4">
+        <div class="card p-4 h-100 shadow-sm border-0">
+            <h4 class="fw-bold mb-4">Average Bus Speeds (km/h)</h4>
+            <div class="list-group">
+                {% for bus in avg_speeds %}
+                <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                    <span class="fw-bold">Bus #{{ bus.bus_number }}</span>
+                    <div class="d-flex align-items-center">
+                        <div class="progress me-3" style="width: 150px; height: 8px;">
+                            <div class="progress-bar bg-success" style="width: {{ bus.avg_speed|default:0 }}%"></div>
+                        </div>
+                        <span class="badge bg-light text-dark">{{ bus.avg_speed|floatformat:1 }} km/h</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Traffic -->
+    <div class="col-md-6 mb-4">
+        <div class="card p-4 h-100 shadow-sm border-0">
+            <h4 class="fw-bold mb-4">Route Activity Density</h4>
+            <div class="list-group">
+                {% for route in route_traffic %}
+                <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                    <span class="fw-bold">{{ route.bus__current_route__name|default:"Unassigned" }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ route.pings }} Location Updates</span>
+                </div>
+                {% empty %}
+                <p class="text-muted">No route movement data collected yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Fleet Distribution Feature -->
+    <div class="col-12 mb-4">
+        <div class="card p-4 shadow-sm border-0 bg-light">
+            <h4 class="fw-bold mb-4 text-center">Fleet Distribution by Route</h4>
+            <div class="row">
+                {% for route in route_traffic|slice:":3" %}
+                <div class="col-md-4 text-center">
+                    <div class="p-3 bg-white rounded-3 shadow-sm">
+                        <h6 class="text-muted small uppercase">Route Load</h6>
+                        <div class="h3 fw-bold text-primary">{{ route.pings }}</div>
+                        <div class="small fw-bold">{{ route.bus__current_route__name|default:"Others" }}</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-info" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card p-4 border-0 shadow-lg text-white" style="background: linear-gradient(135deg, #4b0082 0%, #191970 100%); border-left: 5px solid #ffd700 !important;">
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-warning text-dark rounded-circle p-3 me-3" style="width: 50px; height: 50px; display: grid; place-items: center; box-shadow: 0 0 15px rgba(255,215,0,0.4);">
+                    <i class="fas fa-brain" style="font-size: 24px;"></i>
+                </div>
+                <h4 class="fw-bold mb-0 text-warning">AI Strategic Insight</h4>
+            </div>
+            <p class="mb-0 lead" style="color: #f8f9fa;">
+                Based on historical data, the 
+                <span class="badge bg-warning text-dark px-3 py-2 fw-bold" style="font-size: 1.1rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    {% firstof route_traffic.0.bus__current_route__name "Chennai City Loop" %}
+                </span> 
+                route shows high traffic density. 
+                <span style="color: #ffd700; font-weight: bold;">Consider assigning an additional bus during peak hours (8 AM - 10 AM)</span> 
+                to maintain ETA reliability and passenger satisfaction.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
