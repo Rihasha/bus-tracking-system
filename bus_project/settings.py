@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-ktfe-j=-dpu&cppn%&11%gmsondh6tq(ra#vikpc_5mmjj_4i0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
